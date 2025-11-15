@@ -59,8 +59,8 @@ export default function Home() {
   const hasMatches = matches.length > 0;
 
   return (
-    <main className="min-h-screen bg-background flex items-center justify-center p-4">
-      <div className="w-full max-w-4xl space-y-8">
+    <div className="flex flex-col items-center min-h-screen bg-background">
+      <main className="w-full max-w-4xl p-4 md:p-8 space-y-6">
         <Header />
         <div className="border rounded-xl shadow-sm bg-card">
           {!hasParticipants && (
@@ -99,7 +99,7 @@ export default function Home() {
 
           {hasMatches && <MatchResults matches={matches} />}
         </div>
-      </div>
-    </main>
+      </main>
+    </div>
   );
 }

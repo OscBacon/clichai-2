@@ -33,35 +33,30 @@ export function CsvUploader({ onUpload, disabled, rawCsv }: CsvUploaderProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const parseFile = (file: File) => {
-    Papa.parse<Participant>(file, {
-      header: true,
-      skipEmptyLines: true,
-      delimiter: (input, parser) => {
-        // @ts-ignore
-        return parser.options.DELIMITERS_TO_GUESS.includes('|') ? {
-          delimiter: '|',
-          preview: 0
-        } : {
-          delimiter: ',',
-          preview: 0
-        };
-      },
-      complete: (results) => {
-        if (results.errors.length) {
-          setError(`Error parsing CSV: ${results.errors[0].message}`);
-        } else if (results.data.length === 0) {
-          setError("CSV file is empty or headers are missing.");
-        } else {
-          const fileReader = new FileReader();
-          fileReader.onload = (e) => {
-            const content = e.target?.result as string;
-            onUpload(results.data, results.meta.fields || [], content);
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const csvText = e.target?.result as string;
+      if (!csvText) {
+        setError("Could not read file.");
+        return;
+      }
+
+      Papa.parse<Participant>(csvText, {
+        header: true,
+        skipEmptyLines: true,
+        complete: (results) => {
+          if (results.errors.length) {
+            setError(`Error parsing CSV: ${results.errors[0].message}`);
+          } else if (results.data.length === 0) {
+            setError("CSV file is empty or headers are missing.");
+          } else {
+            onUpload(results.data, results.meta.fields || [], csvText);
             setError(null);
-          };
-          fileReader.readAsText(file);
-        }
-      },
-    });
+          }
+        },
+      });
+    };
+    reader.readAsText(file);
   }
 
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -103,7 +98,7 @@ export function CsvUploader({ onUpload, disabled, rawCsv }: CsvUploaderProps) {
     e.preventDefault();
     setIsDragging(false);
     const file = e.dataTransfer.files?.[0];
-    if (file && file.type === "text/csv") {
+    if (file && (file.type === "text/csv" || file.name.endsWith('.csv'))) {
       parseFile(file);
     } else {
       setError("Please drop a valid .csv file.");
@@ -113,10 +108,10 @@ export function CsvUploader({ onUpload, disabled, rawCsv }: CsvUploaderProps) {
 
   return (
     <>
-      <CardHeader>
-        <CardTitle className="text-2xl font-semibold">Upload your CSV</CardTitle>
+      <CardHeader className="text-center">
+        <CardTitle className="text-2xl font-semibold">Upload your participants</CardTitle>
         <CardDescription>
-          Get AI-powered suggestions to find the best match for your next event.
+        Drag and drop your CSV file here or click to upload
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4 p-6 pt-0">
@@ -148,22 +143,7 @@ export function CsvUploader({ onUpload, disabled, rawCsv }: CsvUploaderProps) {
         </div>
         
         {error && <p className="text-sm text-destructive text-center">{error}</p>}
-
-        <div className="flex justify-center">
-            <Button
-              variant="ghost"
-              onClick={handleSuggestImprovements}
-              disabled={isSuggesting || disabled}
-              className="text-primary hover:text-primary"
-            >
-              {isSuggesting ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                <Lightbulb className="mr-2 h-4 w-4" />
-              )}
-              Get AI Suggestions
-            </Button>
-        </div>
+        
       </CardContent>
 
       <Dialog open={!!suggestions} onOpenChange={(open) => !open && setSuggestions(null)}>
