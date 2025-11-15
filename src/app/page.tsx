@@ -28,10 +28,6 @@ export default function Home() {
     setHeaders(headers);
     setRawCsv(csvContent);
     setMatches([]); // Reset matches on new upload
-    toast({
-      title: "CSV Uploaded!",
-      description: `${data.length} participants loaded successfully.`,
-    });
   };
 
   const handleGenerateMatches = async () => {
@@ -47,10 +43,6 @@ export default function Home() {
       });
     } else if (result.matches) {
       setMatches(result.matches);
-      toast({
-        title: "Matches Generated!",
-        description: "AI-powered recommendations are ready.",
-      });
     }
   };
 
@@ -59,46 +51,45 @@ export default function Home() {
   const hasMatches = matches.length > 0;
 
   return (
-    <div className="flex flex-col items-center min-h-screen bg-background">
-      <main className="w-full max-w-4xl p-4 md:p-8 space-y-6">
-        <Header />
-        <div className="border rounded-xl shadow-sm bg-card">
-          {!hasParticipants && (
-            <CsvUploader
-              onUpload={handleUpload}
-              disabled={isLoading}
-              rawCsv={rawCsv}
-            />
-          )}
+    <div className="flex flex-col items-center min-h-screen bg-background p-4 md:p-8">
+      <Header />
+      <main className="w-full max-w-4xl space-y-6 mt-8">
+        {!hasParticipants && !isLoading && (
+          <CsvUploader
+            onUpload={handleUpload}
+            disabled={isLoading}
+            rawCsv={rawCsv}
+            onGenerateMatches={handleGenerateMatches}
+          />
+        )}
 
-          {hasParticipants && !hasMatches && (
-            <ParticipantTable
-              participants={participants}
-              headers={headers}
-              onGenerateMatches={handleGenerateMatches}
-              isGenerating={isGenerating}
-            />
-          )}
+        {hasParticipants && !hasMatches && !isLoading && (
+          <ParticipantTable
+            participants={participants}
+            headers={headers}
+            onGenerateMatches={handleGenerateMatches}
+            isGenerating={isGenerating}
+          />
+        )}
 
-          {isGenerating && (
-            <div className="p-8 space-y-6">
-              <div className="flex items-center gap-3">
-                <Skeleton className="h-10 w-10 rounded-full" />
-                <div>
-                  <Skeleton className="h-6 w-64" />
-                  <Skeleton className="h-4 w-80 mt-1" />
-                </div>
-              </div>
-              <div className="space-y-4">
-                {[...Array(3)].map((_, i) => (
-                  <Skeleton key={i} className="h-20 w-full" />
-                ))}
+        {isLoading && (
+          <div className="p-8 space-y-6 bg-card rounded-xl border shadow-sm">
+            <div className="flex items-center gap-3">
+              <Skeleton className="h-10 w-10 rounded-full" />
+              <div>
+                <Skeleton className="h-6 w-64" />
+                <Skeleton className="h-4 w-80 mt-1" />
               </div>
             </div>
-          )}
+            <div className="space-y-4">
+              {[...Array(3)].map((_, i) => (
+                <Skeleton key={i} className="h-20 w-full" />
+              ))}
+            </div>
+          </div>
+        )}
 
-          {hasMatches && <MatchResults matches={matches} />}
-        </div>
+        {hasMatches && <MatchResults matches={matches} />}
       </main>
     </div>
   );

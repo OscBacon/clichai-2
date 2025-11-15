@@ -2,20 +2,11 @@
 "use client";
 
 import { useState, useRef, ChangeEvent, DragEvent } from "react";
-import { Upload, Lightbulb, Loader2 } from "lucide-react";
+import { Upload, Loader2 } from "lucide-react";
 import Papa from "papaparse";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import { getSuggestionsAction } from "@/lib/actions";
+import { Card, CardContent } from "@/components/ui/card";
 import type { Participant } from "@/types";
 import { cn } from "@/lib/utils";
 
@@ -23,14 +14,14 @@ interface CsvUploaderProps {
   onUpload: (data: Participant[], headers: string[], rawCsv: string) => void;
   disabled: boolean;
   rawCsv: string;
+  onGenerateMatches: () => void;
 }
 
-export function CsvUploader({ onUpload, disabled, rawCsv }: CsvUploaderProps) {
-  const [isSuggesting, setIsSuggesting] = useState(false);
-  const [suggestions, setSuggestions] = useState<string | null>(null);
+export function CsvUploader({ onUpload, disabled, rawCsv, onGenerateMatches }: CsvUploaderProps) {
   const [error, setError] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [hasFile, setHasFile] = useState(false);
 
   const parseFile = (file: File) => {
     const reader = new FileReader();
@@ -38,6 +29,7 @@ export function CsvUploader({ onUpload, disabled, rawCsv }: CsvUploaderProps) {
       const csvText = e.target?.result as string;
       if (!csvText) {
         setError("Could not read file.");
+        setHasFile(false);
         return;
       }
 
@@ -45,14 +37,27 @@ export function CsvUploader({ onUpload, disabled, rawCsv }: CsvUploaderProps) {
         header: true,
         skipEmptyLines: true,
         dynamicTyping: true,
+        delimiter: (input) => {
+            if (input.includes('|')) {
+                return {
+                    delimiter: '|'
+                };
+            }
+            return {
+                delimiter: ','
+            };
+        },
         complete: (results) => {
           if (results.errors.length) {
             setError(`Error parsing CSV: ${results.errors[0].message}`);
+            setHasFile(false);
           } else if (results.data.length === 0) {
             setError("CSV file is empty or headers are missing.");
+            setHasFile(false);
           } else {
             onUpload(results.data, results.meta.fields || [], csvText);
             setError(null);
+            setHasFile(true);
           }
         },
       });
@@ -65,24 +70,6 @@ export function CsvUploader({ onUpload, disabled, rawCsv }: CsvUploaderProps) {
     if (file) {
       parseFile(file);
     }
-  };
-
-  const handleSuggestImprovements = async () => {
-    if (!rawCsv) {
-      setError("Please upload a file first to get suggestions.");
-      return;
-    }
-
-    setIsSuggesting(true);
-    setError(null);
-
-    const result = await getSuggestionsAction(rawCsv);
-    if (result.error) {
-      setError(result.error);
-    } else {
-      setSuggestions(result.suggestions || "No specific suggestions found.");
-    }
-    setIsSuggesting(false);
   };
   
   const handleDragEnter = (e: DragEvent<HTMLDivElement>) => {
@@ -106,32 +93,29 @@ export function CsvUploader({ onUpload, disabled, rawCsv }: CsvUploaderProps) {
     }
   };
 
-
   return (
-    <>
-      <CardHeader className="text-center">
-        <CardTitle className="text-2xl font-semibold">Upload your participants</CardTitle>
-        <CardDescription>
-        Drag and drop your CSV file here or click to upload
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4 p-6 pt-0">
-        <div 
-          className={cn(
-            "border-2 border-dashed rounded-lg p-12 text-center cursor-pointer transition-colors",
-            isDragging ? "border-primary bg-primary/10" : "border-border hover:border-primary/50"
-          )}
-          onClick={() => fileInputRef.current?.click()}
-          onDragEnter={handleDragEnter}
-          onDragOver={(e) => e.preventDefault()}
-          onDragLeave={handleDragLeave}
-          onDrop={handleDrop}
-        >
-          <Upload className="mx-auto h-12 w-12 text-muted-foreground" />
-          <p className="mt-4 text-muted-foreground">
-            <span className="font-semibold text-primary">Click to upload</span> or drag and drop
+    <div className="space-y-6">
+      <Card
+        className={cn(
+          "border-dashed border-2 rounded-xl transition-colors",
+          isDragging ? "border-primary bg-primary/5" : "border-border/50",
+          disabled && "pointer-events-none opacity-50"
+        )}
+        onClick={() => fileInputRef.current?.click()}
+        onDragEnter={handleDragEnter}
+        onDragOver={(e) => e.preventDefault()}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+      >
+        <CardContent className="p-8 text-center cursor-pointer">
+          <div className="mx-auto h-12 w-12 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center text-white">
+            <Upload className="h-6 w-6" />
+          </div>
+          <p className="mt-4 font-semibold text-foreground">
+            Glissez votre fichier ici
           </p>
-          <p className="text-xs text-muted-foreground mt-1">CSV files only</p>
+          <p className="text-sm text-muted-foreground mt-1">ou cliquez pour parcourir</p>
+          <p className="text-xs text-muted-foreground mt-2">CSV, Excel, PDF</p>
           <Input 
             id="csv-file" 
             type="file" 
@@ -141,28 +125,17 @@ export function CsvUploader({ onUpload, disabled, rawCsv }: CsvUploaderProps) {
             disabled={disabled} 
             className="hidden"
           />
-        </div>
-        
-        {error && <p className="text-sm text-destructive text-center">{error}</p>}
-        
-      </CardContent>
-
-      <Dialog open={!!suggestions} onOpenChange={(open) => !open && setSuggestions(null)}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>AI Improvement Suggestions</DialogTitle>
-            <DialogDescription>
-              Here are some suggestions to improve your CSV for better matching results.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="max-h-[60vh] overflow-y-auto rounded-md border p-4 text-sm">
-            <p style={{ whiteSpace: 'pre-wrap' }}>{suggestions}</p>
-          </div>
-          <DialogFooter>
-            <Button onClick={() => setSuggestions(null)}>Close</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </>
+        </CardContent>
+      </Card>
+      
+      {error && <p className="text-sm text-destructive text-center">{error}</p>}
+      
+      <div className="flex justify-center">
+        <Button onClick={onGenerateMatches} disabled={!hasFile || disabled} size="lg" className="bg-gradient-to-r from-cyan-400 to-blue-500 text-white font-semibold">
+          {disabled && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          Générer les matchs
+        </Button>
+      </div>
+    </div>
   );
 }
