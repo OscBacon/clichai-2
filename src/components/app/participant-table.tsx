@@ -1,0 +1,64 @@
+"use client";
+
+import { Users, Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import type { Participant } from "@/types";
+
+interface ParticipantTableProps {
+  participants: Participant[];
+  headers: string[];
+  onGenerateMatches: () => void;
+  isGenerating: boolean;
+}
+
+export function ParticipantTable({
+  participants,
+  headers,
+  onGenerateMatches,
+  isGenerating,
+}: ParticipantTableProps) {
+  return (
+    <Card className="shadow-lg">
+      <CardHeader>
+        <CardTitle className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-2">
+            <Users className="h-6 w-6" />
+            Participants ({participants.length})
+          </div>
+          <Button onClick={onGenerateMatches} disabled={isGenerating}>
+            {isGenerating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            Generate Matches
+          </Button>
+        </CardTitle>
+        <CardDescription>
+          Review the uploaded participant data below. When ready, generate the AI-powered matches.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <ScrollArea className="h-72 w-full rounded-md border">
+          <Table>
+            <TableHeader className="sticky top-0 bg-muted/50 z-10">
+              <TableRow>
+                {headers.map((header) => (
+                  <TableHead key={header}>{header}</TableHead>
+                ))}
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {participants.map((participant, index) => (
+                <TableRow key={index}>
+                  {headers.map((header) => (
+                    <TableCell key={header} className="whitespace-nowrap">{participant[header]}</TableCell>
+                  ))}
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </ScrollArea>
+      </CardContent>
+    </Card>
+  );
+}
