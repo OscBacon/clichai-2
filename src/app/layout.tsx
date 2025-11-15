@@ -3,7 +3,7 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
-  title: 'Clichai',
+  title: 'Maitch',
   description: 'AI-Powered Meeting Matchmaker',
 };
 

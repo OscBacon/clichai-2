@@ -6,7 +6,7 @@ export function Header() {
     <header className="flex items-center gap-2">
       <Logo className="h-6 w-6 text-primary" />
       <h1 className="text-xl font-semibold tracking-tight text-foreground">
-        Clichai
+        Maitch
       </h1>
     </header>
   );
