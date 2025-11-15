@@ -22,29 +22,37 @@ export function ParticipantTable({
   isGenerating,
 }: ParticipantTableProps) {
   return (
-    <div className="p-6">
+    <div className="p-6 bg-white rounded-lg shadow-lg">
       <CardHeader>
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <CardTitle className="text-2xl font-semibold">
-          Review Participants ({participants.length})
-        </CardTitle>
-          <Button onClick={onGenerateMatches} disabled={isGenerating} size="sm">
+          <CardTitle className="text-2xl font-semibold">
+            Review Participants ({participants.length})
+          </CardTitle>
+          <Button
+            onClick={onGenerateMatches}
+            disabled={isGenerating}
+            size="sm"
+            className="bg-primary text-white font-semibold"
+          >
             {isGenerating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Generate Matches
           </Button>
         </div>
         <CardDescription>
-          Review the uploaded participant data below. When ready, generate the AI-powered matches.
+          Review the uploaded participant data below. When ready, generate the
+          AI-powered matches.
         </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="rounded-md border">
           <ScrollArea className="h-96 w-full">
             <Table>
-              <TableHeader className="sticky top-0 bg-zinc-900 z-10">
+              <TableHeader className="sticky top-0 bg-primary z-10">
                 <TableRow>
                   {headers.map((header) => (
-                    <TableHead key={header} className="text-white">{header}</TableHead>
+                    <TableHead key={header} className="text-white">
+                      {header}
+                    </TableHead>
                   ))}
                 </TableRow>
               </TableHeader>
@@ -52,7 +60,9 @@ export function ParticipantTable({
                 {participants.map((participant, index) => (
                   <TableRow key={index}>
                     {headers.map((header) => (
-                      <TableCell key={header} className="whitespace-nowrap">{participant[header]}</TableCell>
+                      <TableCell key={header} className="whitespace-nowrap">
+                        {participant[header]}
+                      </TableCell>
                     ))}
                   </TableRow>
                 ))}

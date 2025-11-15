@@ -53,7 +53,16 @@ export default function Home() {
   return (
     <div className="flex flex-col items-center min-h-screen bg-background p-4 md:p-8">
       <Header />
-      <main className="w-full max-w-4xl space-y-6 mt-8">
+      <main className="w-full max-w-4xl space-y-6 mt-8 bg-white rounded-lg shadow-lg p-8">
+        <div className="text-center">
+          <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl">
+            AI-Powered Matchmaking
+          </h1>
+          <p className="mt-3 text-lg leading-8 text-gray-600">
+            Upload a CSV of participants and let our AI find the perfect
+            matches.
+          </p>
+        </div>
         {!hasParticipants && !isLoading && (
           <CsvUploader
             onUpload={handleUpload}

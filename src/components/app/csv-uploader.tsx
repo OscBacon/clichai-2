@@ -95,62 +95,55 @@ export function CsvUploader({
 
     return (
         <div className="space-y-6">
-            <Card
-                className={cn(
-                    "border-dashed border-2 rounded-xl transition-colors",
-                    isDragging
-                        ? "border-primary bg-primary/5"
-                        : "border-border/50",
-                    disabled && "pointer-events-none opacity-50"
-                )}
-                onClick={() => fileInputRef.current?.click()}
-                onDragEnter={handleDragEnter}
-                onDragOver={(e) => e.preventDefault()}
-                onDragLeave={handleDragLeave}
-                onDrop={handleDrop}
-            >
-                <CardContent className="p-8 text-center cursor-pointer">
-                    <div className="mx-auto h-12 w-12 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center text-white">
-                        <Upload className="h-6 w-6" />
-                    </div>
-                    <p className="mt-4 font-semibold text-foreground">
-                        Drag and drop your file here
-                    </p>
-                    <p className="text-sm text-muted-foreground mt-1">
-                        or click to browse
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-2">
-                        CSV, Excel, PDF
-                    </p>
-                    <Input
-                        id="csv-file"
-                        type="file"
-                        accept=".csv"
-                        onChange={handleFileChange}
-                        ref={fileInputRef}
-                        disabled={disabled}
-                        className="hidden"
-                    />
-                </CardContent>
-            </Card>
+      <Card
+        className={cn(
+          "border-dashed border-2 rounded-xl transition-colors",
+          isDragging ? "border-primary bg-primary/5" : "border-border/50",
+          disabled && "pointer-events-none opacity-50"
+        )}
+        onClick={() => fileInputRef.current?.click()}
+        onDragEnter={handleDragEnter}
+        onDragOver={(e) => e.preventDefault()}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+      >
+        <CardContent className="p-8 text-center cursor-pointer">
+          <div className="mx-auto h-16 w-16 rounded-full bg-primary flex items-center justify-center text-white">
+            <Upload className="h-8 w-8" />
+          </div>
+          <p className="mt-4 text-lg font-semibold text-foreground">
+            Upload your CSV file
+          </p>
+          <p className="text-sm text-muted-foreground mt-1">
+            Drag and drop or click to browse
+          </p>
+          <Input
+            id="csv-file"
+            type="file"
+            accept=".csv"
+            onChange={handleFileChange}
+            ref={fileInputRef}
+            disabled={disabled}
+            className="hidden"
+          />
+        </CardContent>
+      </Card>
 
-            {error && (
-                <p className="text-sm text-destructive text-center">{error}</p>
-            )}
+      {error && (
+        <p className="text-sm text-destructive text-center">{error}</p>
+      )}
 
-            <div className="flex justify-center">
-                <Button
-                    onClick={onGenerateMatches}
-                    disabled={!hasFile || disabled}
-                    size="lg"
-                    className="bg-gradient-to-r from-cyan-400 to-blue-500 text-white font-semibold"
-                >
-                    {disabled && (
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    )}
-                    Generate Matches
-                </Button>
-            </div>
-        </div>
+      <div className="flex justify-center">
+        <Button
+          onClick={onGenerateMatches}
+          disabled={!hasFile || disabled}
+          size="lg"
+          className="bg-primary text-white font-semibold"
+        >
+          {disabled && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          Generate Matches
+        </Button>
+      </div>
+    </div>
     );
 }

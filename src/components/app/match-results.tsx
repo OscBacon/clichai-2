@@ -80,7 +80,12 @@ export function MatchResults({ matches }: MatchResultsProps) {
     <div className="bg-card rounded-xl border shadow-sm p-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <h2 className="text-2xl font-semibold">Your Matches</h2>
-        <Button onClick={handleSave} disabled={isSaving} size="sm">
+        <Button
+          onClick={handleSave}
+          disabled={isSaving}
+          size="sm"
+          className="bg-primary text-white font-semibold"
+        >
           {isSaving ? (
             <Check className="mr-2" />
           ) : (
@@ -94,39 +99,58 @@ export function MatchResults({ matches }: MatchResultsProps) {
         {uniqueMatches.map((match, index) => (
           <Accordion type="single" collapsible className="w-full" key={index}>
             <AccordionItem value={`item-${index}`} className="border-b-0">
-                <div className="flex items-center gap-4 text-sm font-medium p-4 rounded-lg bg-secondary/50">
-                  <div className="flex items-center justify-center h-8 w-8 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 text-white font-bold text-xs">
-                    {index + 1}
-                  </div>
-                  <div className="flex-1 flex items-center gap-2">
-                    <span>
-                      {match.participant[mainParticipantKey] || "Participant"}
-                    </span>
-                    {match.match ? (
-                      <>
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-muted-foreground">
-                        <path d="M21 12H3M3 12L8 7M3 12L8 17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        <path d="M3 12H21M21 12L16 7M21 12L16 17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                      <span>
-                        {match.match[mainParticipantKey]}
-                      </span>
-                      </>
-                    ) : (
-                      <div className="flex items-center gap-2 text-destructive">
-                        <UserX className="h-4 w-4" />
-                        <span>Unmatched</span>
-                      </div>
-                    )}
-                  </div>
-                  <AccordionTrigger className="p-2 hover:no-underline [&[data-state=open]>svg]:text-primary" />
+              <div className="flex items-center gap-4 text-sm font-medium p-4 rounded-lg bg-secondary/50">
+                <div className="flex items-center justify-center h-8 w-8 rounded-full bg-primary text-white font-bold text-xs">
+                  {index + 1}
                 </div>
+                <div className="flex-1 flex items-center gap-2">
+                  <span>
+                    {match.participant[mainParticipantKey] || "Participant"}
+                  </span>
+                  {match.match ? (
+                    <>
+                      <svg
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="text-muted-foreground"
+                      >
+                        <path
+                          d="M21 12H3M3 12L8 7M3 12L8 17"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                        <path
+                          d="M3 12H21M21 12L16 7M21 12L16 17"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                      <span>{match.match[mainParticipantKey]}</span>
+                    </>
+                  ) : (
+                    <div className="flex items-center gap-2 text-destructive">
+                      <UserX className="h-4 w-4" />
+                      <span>Unmatched</span>
+                    </div>
+                  )}
+                </div>
+                <AccordionTrigger className="p-2 hover:no-underline [&[data-state=open]>svg]:text-primary" />
+              </div>
               <AccordionContent>
                 <div className="p-4 bg-background rounded-b-lg">
                   <div className="pl-12 text-muted-foreground space-y-2 text-sm">
                     {match.explanation ? (
                       <>
-                        <p className="font-semibold text-foreground">AI Explanation:</p>
+                        <p className="font-semibold text-foreground">
+                          AI Explanation:
+                        </p>
                         <p>{match.explanation}</p>
                       </>
                     ) : (
