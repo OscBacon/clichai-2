@@ -112,9 +112,9 @@ export function CsvUploader({ onUpload, disabled, rawCsv, onGenerateMatches }: C
             <Upload className="h-6 w-6" />
           </div>
           <p className="mt-4 font-semibold text-foreground">
-            Glissez votre fichier ici
+            Drag and drop your file here
           </p>
-          <p className="text-sm text-muted-foreground mt-1">ou cliquez pour parcourir</p>
+          <p className="text-sm text-muted-foreground mt-1">or click to browse</p>
           <p className="text-xs text-muted-foreground mt-2">CSV, Excel, PDF</p>
           <Input 
             id="csv-file" 
@@ -133,7 +133,7 @@ export function CsvUploader({ onUpload, disabled, rawCsv, onGenerateMatches }: C
       <div className="flex justify-center">
         <Button onClick={onGenerateMatches} disabled={!hasFile || disabled} size="lg" className="bg-gradient-to-r from-cyan-400 to-blue-500 text-white font-semibold">
           {disabled && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          Générer les matchs
+          Generate Matches
         </Button>
       </div>
     </div>
