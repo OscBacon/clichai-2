@@ -1,7 +1,7 @@
 
 "use client";
 
-import { Users, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -38,26 +38,28 @@ export function ParticipantTable({
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <ScrollArea className="h-96 w-full rounded-md border">
-          <Table>
-            <TableHeader className="sticky top-0 bg-card z-10">
-              <TableRow>
-                {headers.map((header) => (
-                  <TableHead key={header}>{header}</TableHead>
-                ))}
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {participants.map((participant, index) => (
-                <TableRow key={index}>
+        <div className="rounded-md border">
+          <ScrollArea className="h-96 w-full">
+            <Table>
+              <TableHeader className="sticky top-0 bg-zinc-900 z-10">
+                <TableRow>
                   {headers.map((header) => (
-                    <TableCell key={header} className="whitespace-nowrap">{participant[header]}</TableCell>
+                    <TableHead key={header} className="text-white">{header}</TableHead>
                   ))}
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </ScrollArea>
+              </TableHeader>
+              <TableBody>
+                {participants.map((participant, index) => (
+                  <TableRow key={index}>
+                    {headers.map((header) => (
+                      <TableCell key={header} className="whitespace-nowrap">{participant[header]}</TableCell>
+                    ))}
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </ScrollArea>
+        </div>
       </CardContent>
     </div>
   );

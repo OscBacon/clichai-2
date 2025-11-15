@@ -44,6 +44,7 @@ export function CsvUploader({ onUpload, disabled, rawCsv }: CsvUploaderProps) {
       Papa.parse<Participant>(csvText, {
         header: true,
         skipEmptyLines: true,
+        dynamicTyping: true,
         complete: (results) => {
           if (results.errors.length) {
             setError(`Error parsing CSV: ${results.errors[0].message}`);
