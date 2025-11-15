@@ -3,7 +3,14 @@
 import { useState } from "react";
 import { Save, Users, Zap, Check, UserX } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardFooter,
+} from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { db } from "@/lib/firebase";
 import { collection, addDoc } from "firebase/firestore";
@@ -28,7 +35,7 @@ export function MatchResults({ matches }: MatchResultsProps) {
     setIsSaving(true);
     try {
       const partyId = `party-${Date.now()}`;
-      const promises = matches.map(matchData => {
+      const promises = matches.map((matchData) => {
         const docData = {
           ...matchData.participant,
           match: matchData.match ? matchData.match : null,
@@ -49,25 +56,27 @@ export function MatchResults({ matches }: MatchResultsProps) {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Could not save matches to Firestore. Check your Firebase setup and console for errors.",
+        description:
+          "Could not save matches to Firestore. Check your Firebase setup and console for errors.",
       });
     } finally {
       setIsSaving(false);
     }
   };
-  
-  const mainParticipantKeys = Object.keys(matches[0]?.participant || {});
 
+  const mainParticipantKeys = Object.keys(matches[0]?.participant || {});
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex items-center gap-3">
-            <Zap className="h-8 w-8 text-primary" />
-            <div>
-              <h2 className="text-2xl font-bold">Match Recommendations</h2>
-              <p className="text-muted-foreground">AI has generated the optimal pairings for your event.</p>
-            </div>
+          <Zap className="h-8 w-8 text-primary" />
+          <div>
+            <h2 className="text-2xl font-bold">Match Recommendations</h2>
+            <p className="text-muted-foreground">
+              AI has generated the optimal pairings for your event.
+            </p>
+          </div>
         </div>
         <Button onClick={handleSave} disabled={isSaving}>
           {isSaving ? (
@@ -82,47 +91,76 @@ export function MatchResults({ matches }: MatchResultsProps) {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <TooltipProvider>
           {matches.map((match, index) => (
-            <Card key={index} className="flex flex-col shadow-lg animate-in fade-in-50 duration-500">
+            <Card
+              key={index}
+              className="flex flex-col shadow-lg animate-in fade-in-50 duration-500"
+            >
               <CardHeader>
                 <CardTitle className="flex items-start justify-between">
-                  <span className="font-semibold text-lg">{match.participant[mainParticipantKeys[0]] || 'Participant'}</span>
-                   {match.match ? (
+                  <span className="font-semibold text-lg">
+                    {match.participant[mainParticipantKeys[0]] || "Participant"}
+                  </span>
+                  {match.match ? (
                     <Tooltip>
                       <TooltipTrigger asChild>
-                         <Badge variant="secondary" className="flex items-center gap-1.5 cursor-default">
-                           <Users className="h-3.5 w-3.5" />
-                           <span>Matched</span>
-                         </Badge>
+                        <Badge
+                          variant="secondary"
+                          className="flex items-center gap-1.5 cursor-default"
+                        >
+                          <Users className="h-3.5 w-3.5" />
+                          <span>Matched</span>
+                        </Badge>
                       </TooltipTrigger>
                       <TooltipContent>
-                        <p>Matched with {match.match[mainParticipantKeys[0]]}</p>
+                        <p>
+                          Matched with {match.match[mainParticipantKeys[0]]}
+                        </p>
                       </TooltipContent>
                     </Tooltip>
                   ) : (
-                    <Badge variant="destructive" className="flex items-center gap-1.5">
-                       <UserX className="h-3.5 w-3.5" />
-                       Unmatched
+                    <Badge
+                      variant="destructive"
+                      className="flex items-center gap-1.5"
+                    >
+                      <UserX className="h-3.5 w-3.5" />
+                      Unmatched
                     </Badge>
                   )}
                 </CardTitle>
                 <CardDescription>
-                  {mainParticipantKeys.length > 1 ? mainParticipantKeys.slice(1,3).map(key => `${match.participant[key]}`).join(' / ') : '...'}
+                  {mainParticipantKeys.length > 1
+                    ? mainParticipantKeys
+                        .slice(1, 3)
+                        .map((key) => `${match.participant[key]}`)
+                        .join(" / ")
+                    : "..."}
                 </CardDescription>
               </CardHeader>
               <CardContent className="flex-grow">
-                 {match.match ? (
+                {match.match ? (
                   <div className="bg-muted/50 p-4 rounded-lg space-y-2 h-full">
-                     <p className="text-sm font-medium text-muted-foreground">Recommended Match:</p>
-                     <h4 className="font-semibold text-foreground">{match.match[mainParticipantKeys[0]]}</h4>
-                     <p className="text-sm text-muted-foreground">
-                        {mainParticipantKeys.length > 1 ? mainParticipantKeys.slice(1,3).map(key => `${match.match?.[key]}`).join(' / ') : '...'}
-                     </p>
+                    <p className="text-sm font-medium text-muted-foreground">
+                      Recommended Match:
+                    </p>
+                    <h4 className="font-semibold text-foreground">
+                      {match.match[mainParticipantKeys[0]]}
+                    </h4>
+                    <p className="text-sm text-muted-foreground">
+                      {mainParticipantKeys.length > 1
+                        ? mainParticipantKeys
+                            .slice(1, 3)
+                            .map((key) => `${match.match?.[key]}`)
+                            .join(" / ")
+                        : "..."}
+                    </p>
                   </div>
-                 ) : (
-                   <div className="bg-muted/50 p-4 rounded-lg text-center h-full flex items-center justify-center">
-                    <p className="text-sm text-muted-foreground">No available match for this participant.</p>
-                   </div>
-                 )}
+                ) : (
+                  <div className="bg-muted/50 p-4 rounded-lg text-center h-full flex items-center justify-center">
+                    <p className="text-sm text-muted-foreground">
+                      No available match for this participant.
+                    </p>
+                  </div>
+                )}
               </CardContent>
               {match.explanation && (
                 <CardFooter>
