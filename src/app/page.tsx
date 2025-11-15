@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -8,19 +9,24 @@ import { MatchResults } from "@/components/app/match-results";
 import { generateMatchesAction } from "@/lib/actions";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowDown } from "lucide-react";
 import type { Participant, Match } from "@/types";
 
 export default function Home() {
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [headers, setHeaders] = useState<string[]>([]);
+  const [rawCsv, setRawCsv] = useState<string>("");
   const [matches, setMatches] = useState<Match[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const { toast } = useToast();
 
-  const handleUpload = (data: Participant[], headers: string[]) => {
+  const handleUpload = (
+    data: Participant[],
+    headers: string[],
+    csvContent: string
+  ) => {
     setParticipants(data);
     setHeaders(headers);
+    setRawCsv(csvContent);
     setMatches([]); // Reset matches on new upload
     toast({
       title: "CSV Uploaded!",
@@ -53,44 +59,46 @@ export default function Home() {
   const hasMatches = matches.length > 0;
 
   return (
-    <main className="min-h-screen bg-background">
-      <Header />
-      <div className="container mx-auto max-w-5xl px-4 pb-16 space-y-8">
-        <CsvUploader onUpload={handleUpload} disabled={isLoading} />
-        
-        {hasParticipants && !hasMatches && (
-          <div className="space-y-8 animate-in fade-in-50 duration-500">
-            <div className="flex justify-center">
-                <ArrowDown className="h-8 w-8 text-muted-foreground animate-bounce" />
-            </div>
+    <main className="min-h-screen bg-background flex items-center justify-center p-4">
+      <div className="w-full max-w-4xl space-y-8">
+        <Header />
+        <div className="border rounded-xl shadow-sm bg-card">
+          {!hasParticipants && (
+            <CsvUploader
+              onUpload={handleUpload}
+              disabled={isLoading}
+              rawCsv={rawCsv}
+            />
+          )}
+
+          {hasParticipants && !hasMatches && (
             <ParticipantTable
               participants={participants}
               headers={headers}
               onGenerateMatches={handleGenerateMatches}
               isGenerating={isGenerating}
             />
-          </div>
-        )}
+          )}
 
-        {isGenerating && (
-          <div className="space-y-6">
-            <div className="flex items-center gap-3">
-              <Skeleton className="h-10 w-10 rounded-full" />
-              <div>
-                <Skeleton className="h-6 w-64" />
-                <Skeleton className="h-4 w-80 mt-1" />
+          {isGenerating && (
+            <div className="p-8 space-y-6">
+              <div className="flex items-center gap-3">
+                <Skeleton className="h-10 w-10 rounded-full" />
+                <div>
+                  <Skeleton className="h-6 w-64" />
+                  <Skeleton className="h-4 w-80 mt-1" />
+                </div>
+              </div>
+              <div className="space-y-4">
+                {[...Array(3)].map((_, i) => (
+                  <Skeleton key={i} className="h-20 w-full" />
+                ))}
               </div>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[...Array(3)].map((_, i) => (
-                <Skeleton key={i} className="h-72 w-full" />
-              ))}
-            </div>
-          </div>
-        )}
-        
-        {hasMatches && <MatchResults matches={matches} />}
-        
+          )}
+
+          {hasMatches && <MatchResults matches={matches} />}
+        </div>
       </div>
     </main>
   );

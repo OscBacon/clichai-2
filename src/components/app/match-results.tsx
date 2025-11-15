@@ -1,26 +1,19 @@
+
 "use client";
 
 import { useState } from "react";
-import { Save, Users, Zap, Check, UserX } from "lucide-react";
+import { Save, Users, Zap, Check, UserX, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardFooter,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { db } from "@/lib/firebase";
 import { collection, addDoc } from "firebase/firestore";
-import { Badge } from "@/components/ui/badge";
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import type { Match } from "@/types";
 
 interface MatchResultsProps {
@@ -35,10 +28,20 @@ export function MatchResults({ matches }: MatchResultsProps) {
     setIsSaving(true);
     try {
       const partyId = `party-${Date.now()}`;
-      const promises = matches.map((matchData) => {
+      // We only want to save one side of the match to avoid duplicates
+      const uniqueMatches = matches.filter(
+        (match, index) =>
+          !match.match ||
+          matches.findIndex(
+            (m) =>
+              m.participant === match.match && m.match === match.participant
+          ) > index
+      );
+
+      const promises = uniqueMatches.map((matchData) => {
         const docData = {
-          ...matchData.participant,
-          match: matchData.match ? matchData.match : null,
+          participant1: matchData.participant,
+          participant2: matchData.match,
           explanation: matchData.explanation,
           partyId: partyId,
         };
@@ -64,120 +67,85 @@ export function MatchResults({ matches }: MatchResultsProps) {
     }
   };
 
-  const mainParticipantKeys = Object.keys(matches[0]?.participant || {});
+  const mainParticipantKey = Object.keys(matches[0]?.participant || {})[0];
+
+  // We only want to display one side of the match
+  const uniqueMatches = matches.filter(
+    (match, index) =>
+      !match.match ||
+      matches.findIndex(
+        (m) =>
+          m.participant === match.match && m.match === match.participant
+      ) > index
+  );
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <Zap className="h-8 w-8 text-primary" />
-          <div>
-            <h2 className="text-2xl font-bold">Match Recommendations</h2>
-            <p className="text-muted-foreground">
-              AI has generated the optimal pairings for your event.
-            </p>
-          </div>
+    <div className="p-6">
+      <CardHeader>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <CardTitle className="text-2xl font-semibold">
+            Your Matches
+          </CardTitle>
+          <Button onClick={handleSave} disabled={isSaving} size="sm">
+            {isSaving ? (
+              <Check className="mr-2" />
+            ) : (
+              <Save className="mr-2" />
+            )}
+            Save to Firestore
+          </Button>
         </div>
-        <Button onClick={handleSave} disabled={isSaving}>
-          {isSaving ? (
-            <Check className="mr-2 h-4 w-4 animate-pulse" />
-          ) : (
-            <Save className="mr-2 h-4 w-4" />
-          )}
-          Save to Firestore
-        </Button>
-      </div>
+        <CardDescription>
+          AI has generated the optimal pairings for your event.
+        </CardDescription>
+      </CardHeader>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <TooltipProvider>
-          {matches.map((match, index) => (
-            <Card
-              key={index}
-              className="flex flex-col shadow-lg animate-in fade-in-50 duration-500"
-            >
-              <CardHeader>
-                <CardTitle className="flex items-start justify-between">
-                  <span className="font-semibold text-lg">
-                    {match.participant[mainParticipantKeys[0]] || "Participant"}
-                  </span>
+      <CardContent>
+        <Accordion type="multiple" className="w-full">
+          {uniqueMatches.map((match, index) => (
+            <AccordionItem value={`item-${index}`} key={index}>
+              <AccordionTrigger className="hover:no-underline">
+                <div className="flex items-center gap-4 text-sm font-medium">
+                  <div className="flex items-center gap-2">
+                    <Users className="h-5 w-5 text-muted-foreground" />
+                    <span>
+                      {match.participant[mainParticipantKey] || "Participant"}
+                    </span>
+                  </div>
                   {match.match ? (
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Badge
-                          variant="secondary"
-                          className="flex items-center gap-1.5 cursor-default"
-                        >
-                          <Users className="h-3.5 w-3.5" />
-                          <span>Matched</span>
-                        </Badge>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>
-                          Matched with {match.match[mainParticipantKeys[0]]}
-                        </p>
-                      </TooltipContent>
-                    </Tooltip>
+                    <>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-muted-foreground">
+                      <path d="M21 12H3M3 12L8 7M3 12L8 17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path d="M3 12H21M21 12L16 7M21 12L16 17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                    <span>
+                      {match.match[mainParticipantKey]}
+                    </span>
+                    </>
                   ) : (
-                    <Badge
-                      variant="destructive"
-                      className="flex items-center gap-1.5"
-                    >
-                      <UserX className="h-3.5 w-3.5" />
-                      Unmatched
-                    </Badge>
+                    <div className="flex items-center gap-2 text-destructive">
+                       <UserX className="h-4 w-4" />
+                       <span>Unmatched</span>
+                    </div>
                   )}
-                </CardTitle>
-                <CardDescription>
-                  {mainParticipantKeys.length > 1
-                    ? mainParticipantKeys
-                        .slice(1, 3)
-                        .map((key) => `${match.participant[key]}`)
-                        .join(" / ")
-                    : "..."}
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="flex-grow">
-                {match.match ? (
-                  <div className="bg-muted/50 p-4 rounded-lg space-y-2 h-full">
-                    <p className="text-sm font-medium text-muted-foreground">
-                      Recommended Match:
-                    </p>
-                    <h4 className="font-semibold text-foreground">
-                      {match.match[mainParticipantKeys[0]]}
-                    </h4>
-                    <p className="text-sm text-muted-foreground">
-                      {mainParticipantKeys.length > 1
-                        ? mainParticipantKeys
-                            .slice(1, 3)
-                            .map((key) => `${match.match?.[key]}`)
-                            .join(" / ")
-                        : "..."}
-                    </p>
-                  </div>
-                ) : (
-                  <div className="bg-muted/50 p-4 rounded-lg text-center h-full flex items-center justify-center">
-                    <p className="text-sm text-muted-foreground">
-                      No available match for this participant.
-                    </p>
-                  </div>
-                )}
-              </CardContent>
-              {match.explanation && (
-                <CardFooter>
-                  <details className="w-full">
-                    <summary className="cursor-pointer text-sm font-medium text-primary hover:underline">
-                      Why this match?
-                    </summary>
-                    <p className="mt-2 text-sm text-foreground/80 border-l-2 border-primary pl-3">
-                      {match.explanation}
-                    </p>
-                  </details>
-                </CardFooter>
-              )}
-            </Card>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent>
+                <div className="pl-8 text-muted-foreground space-y-2">
+                  {match.explanation ? (
+                    <>
+                      <p className="font-semibold text-foreground">AI Explanation:</p>
+                      <p>{match.explanation}</p>
+                    </>
+                  ) : (
+                     <p>No available match for this participant.</p>
+                  )}
+                </div>
+              </AccordionContent>
+            </AccordionItem>
           ))}
-        </TooltipProvider>
-      </div>
+        </Accordion>
+      </CardContent>
     </div>
   );
 }
